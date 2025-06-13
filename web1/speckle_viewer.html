@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Speckle Viewer</title>
+    <style>
+      body { margin: 0; background: #2C2C2C;}
+      #renderer { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="renderer"></div>
+
+    <!-- MODULE script -->
+    <script type="module">
+      import {
+        Viewer, DefaultViewerParams,
+        SpeckleLoader, UrlHelper,
+        CameraController, MeasurementsExtension
+      } from "https://cdn.jsdelivr.net/npm/@speckle/viewer@latest/dist/viewer.mjs";
+
+      // Define it FIRST as a regular function (not arrow)
+      async function startSpeckleViewer(url, token = "") {
+        alert(`Loading SPECKLE model: ${url}`);
+        const container = document.getElementById("renderer");
+        const params = DefaultViewerParams;
+        params.verbose = true;
+        const viewer = new Viewer(container, params);
+        await viewer.init();
+        viewer.createExtension(CameraController);
+        viewer.createExtension(MeasurementsExtension);
+
+        let urls = await UrlHelper.getResourceUrls(url, token);
+        for (const u of urls) {
+          const loader = new SpeckleLoader(viewer.getWorldTree(), u, token);
+          await viewer.loadObject(loader, true);
+        }
+      }
+
+      // Attach function to window from inside the module
+      window.startSpeckleViewer = startSpeckleViewer;
+    </script>
+
+    <!-- DEBUG: Check if window.startSpeckleViewer exists -->
+    <script>
+      setTimeout(function() {
+        if (window.startSpeckleViewer) {
+          console.log("SUCCESS: startSpeckleViewer now defined on window!");
+        } else {
+          console.error("FAIL: startSpeckleViewer is NOT defined on window.");
+        }
+      }, 1000);
+    </script>
+
+    <!-- OPTIONAL: Test Button -->
+    <button onclick="window.startSpeckleViewer && window.startSpeckleViewer('https://app.speckle.systems/projects/7591c56179/models/32213f5381')">Test Viewer (Demo URL)</button>
+
+  </body>
+</html>

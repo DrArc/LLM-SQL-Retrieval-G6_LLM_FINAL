@@ -4,12 +4,12 @@ import os
 # Ensure local import path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from llm_calls import extract_variables, build_answer
-from sql_calls import query_or_recommend
+from scripts.llm_calls import extract_variables, build_answer
+from scripts.sql_calls import query_or_recommend
 
 # === CONFIG: Choose input mode ===
 use_structured_input = True  # ⬅️ Set to True to test structured inputs directly
-
+    #
 # === INPUT BLOCK ===
 if use_structured_input:
     print("🟢 Using structured input...")

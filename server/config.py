@@ -7,7 +7,7 @@ import sqlite3
 mode = "cloudflare"  # "local" or "openai" or "cloudflare"
 
 # API Clients
-local_client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+local_client = OpenAI(base_url="http://localhost:1234/v1//chat/completions", api_key="lm-studio")
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 cloudflare_client = OpenAI(
     base_url=f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}/ai/v1",
@@ -20,15 +20,15 @@ cloudflare_embedding_model = "@cf/baai/bge-base-en-v1.5"
 openai_embedding_model = "text-embedding-3-small"
 
 # Completion Models
-gpt4o = [{
-    "model": "gpt-4o",
+gpt4o= [{
+    "model": "gpt-o4-mini",
     "api_key": OPENAI_API_KEY,
     "cache_seed": random.randint(0, 100000),
 }]
 
 llama3 = [{
-    "model": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-    "api_key": "any string here is fine",
+    "model": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+    "api_key": "meta-llama-3.1-8b-instruct",
     "api_type": "openai",
     "base_url": "http://127.0.0.1:1234",
     "cache_seed": random.randint(0, 100000),

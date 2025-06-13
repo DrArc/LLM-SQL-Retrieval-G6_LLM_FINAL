@@ -45,6 +45,6 @@ pipeline.fit(X_train, y_train)
 
 # === 7. Save Trained Model ===
 os.makedirs("model", exist_ok=True)
-joblib.dump(pipeline, "model/acoustic_comfort_score_model.pkl")
+joblib.dump(pipeline, "model/ecoform_acoustic_comfort_model.pkl")
 
-print("✅ Model trained and saved to model/acoustic_comfort_score_model.pkl")
+print("✅ Model trained and saved to model/ecoform_acoustic_comfort_model.pkl")
