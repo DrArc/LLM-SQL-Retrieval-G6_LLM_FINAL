@@ -1,69 +1,49 @@
-# sql/create_ecoform_db.py
+# sql/create_sql_db.py
 
 import sqlite3
 import pandas as pd
-from pathlib import Path
-import re
+import os
+import sys
+
+# Ensure local import path for Cursor
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.column_cleaner import fully_standardize_dataframe
 
 # File paths
-csv_file_path = Path("sql/Ecoform_Dataset_v1.csv")
-db_file_path = Path("sql/comfort-database.db")
+CSV_PATH = "sql/Ecoform_Dataset_v1.csv"
+DB_PATH = "sql/comfort-database.db"
 
-# Load CSV
-df = pd.read_csv(csv_file_path)
+# Load dataset
+df = pd.read_csv(CSV_PATH)
 
-# === Clean and Deduplicate Column Names ===
-def clean_col(col):
-    col = col.strip().lower()
-    col = re.sub(r'[():]', '', col)
-    col = re.sub(r'\s+', '_', col)
-    return col
-
-raw_cols = [clean_col(col) for col in df.columns]
-deduped_cols = []
-seen = {}
-for col in raw_cols:
-    if col not in seen:
-        seen[col] = 1
-        deduped_cols.append(col)
-    else:
-        seen[col] += 1
-        deduped_cols.append(f"{col}_{seen[col]}")
-
-df.columns = deduped_cols
+# Apply full universal cleaner (both cleaning + renaming)
+df = fully_standardize_dataframe(df)
 
 # Connect to SQLite
-conn = sqlite3.connect(db_file_path)
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-# Drop existing table if it exists
+# Drop existing table if exists
 cursor.execute("DROP TABLE IF EXISTS comfort_lookup")
 
-# Define SQL column types based on DataFrame
-columns = df.columns
-types = df.dtypes
-
+# Dynamically define SQL table schema
 column_defs = []
-for col, dtype in zip(columns, types):
+for col, dtype in zip(df.columns, df.dtypes):
     if pd.api.types.is_integer_dtype(dtype):
-        col_type = 'INTEGER'
+        sql_type = 'INTEGER'
     elif pd.api.types.is_float_dtype(dtype):
-        col_type = 'REAL'
+        sql_type = 'REAL'
     else:
-        col_type = 'TEXT'
-    column_defs.append(f'"{col}" {col_type}')
+        sql_type = 'TEXT'
+    column_defs.append(f'"{col}" {sql_type}')
 
-# Create table
-create_table_sql = f'''
-CREATE TABLE comfort_lookup (
-    {', '.join(column_defs)}
-)
-'''
-cursor.execute(create_table_sql)
+# Create SQL table
+create_sql = f"CREATE TABLE comfort_lookup ({', '.join(column_defs)})"
+cursor.execute(create_sql)
 
 # Insert data into table
 df.to_sql("comfort_lookup", conn, if_exists="append", index=False)
-print(f"✅ Ecoform dataset inserted into {db_file_path}")
-
-# Close connection
 conn.close()
+
+print("✅ Ecoform dataset fully cleaned & inserted into SQL")

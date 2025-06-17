@@ -1,5 +1,14 @@
-from server.config import client, completion_model
+# llm_calls.py
+
+import sys
+import os
 import re
+import ast  # safer than eval
+
+# ✅ Path hack to ensure imports work inside Cursor
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from server.config import client, completion_model
 
 # 🔹 Extract structured variables from free-form question
 def extract_variables(user_question: str) -> dict:
@@ -10,19 +19,19 @@ def extract_variables(user_question: str) -> dict:
                 "role": "system",
                 "content": """
 You are an assistant for acoustic comfort evaluation.
-You receive a user's question and return a dictionary of structured inputs.
 
-Extract ONLY these fields if mentioned:
-- Apartment_Type
-- Zone
-- Element (room type)
-- wall_material
-- window_material
-- Floor_Level (numeric)
-- activity (e.g. Living, Sleeping, Working)
+Your job is to extract structured inputs from user questions.
+Extract ONLY these fields if mentioned (case sensitive keys below):
 
-Return a Python dictionary (no explanation).
-If a field is missing, omit it.
+- apartment_type_string  (e.g. "1Bed", "2Bed")
+- zone_string            (e.g. "Urban", "HD-Urban-V1")
+- element_materials_string  (provide full string if available)
+- floor_level            (numeric integer)
+- activity               (Living, Sleeping, Working, Healing, Co-working)
+
+Return ONLY a valid Python dictionary.
+Omit fields if not mentioned.
+Return no explanations.
 """
             },
             {
@@ -34,7 +43,8 @@ If a field is missing, omit it.
 
     try:
         content = response.choices[0].message.content.strip()
-        variables = eval(content) if isinstance(content, str) else content
+        # ✅ Safer parsing instead of eval
+        variables = ast.literal_eval(content)
         return variables
     except Exception as e:
         print("⚠️ Extraction failed:", e)

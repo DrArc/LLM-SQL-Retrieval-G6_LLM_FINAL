@@ -4,7 +4,7 @@ from server.keys import *
 import sqlite3
 
 # Mode
-mode = "cloudflare"  # "local" or "openai" or "cloudflare"
+mode = "openai"  # "local" or "openai" or "cloudflare"
 
 # API Clients
 local_client = OpenAI(base_url="http://localhost:1234/v1//chat/completions", api_key="lm-studio")
@@ -21,7 +21,7 @@ openai_embedding_model = "text-embedding-3-small"
 
 # Completion Models
 gpt4o= [{
-    "model": "gpt-o4-mini",
+    "model": "gpt-3.5-turbo",
     "api_key": OPENAI_API_KEY,
     "cache_seed": random.randint(0, 100000),
 }]
